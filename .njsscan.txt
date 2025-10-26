@@ -1,9 +1,0 @@
-{
-  "ignore": ["node_modules", "tools", "plugins/visual-editor"],
-  "severity": "error,warning",
-  "scan": [
-    "src/",
-    "contexts/",
-    "lib/"
-  ]
-}
