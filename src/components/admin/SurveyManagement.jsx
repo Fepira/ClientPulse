@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
     import SurveyActions from '@/components/admin/surveys/SurveyActions';
     import SurveyTable from '@/components/admin/surveys/SurveyTable';
     import SurveyModals from '@/components/admin/surveys/SurveyModals';
-    import * as XLSX from 'xlsx';
+    import * as XLSX from 'xlsx-js-style';
     
     const SurveyManagement = ({ surveys, rubros, onUpdate }) => {
       const { toast } = useToast();
@@ -182,9 +182,32 @@ import React, { useState, useEffect } from 'react';
           ['¿Qué producto te gustó más?', 'multiple-choice', '', 'cafe_americano:Café Americano;torta_chocolate:Torta de Chocolate;jugo_natural:Jugo Natural', '', 'FALSE', 'FALSE', '', '', ''],
         ];
         
+        // Crear la hoja de cálculo con estilos
         const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+        
+        // Aplicar estilos al encabezado
+        const headerStyle = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "4F46E5" } },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+        
+        // Aplicar estilos a las celdas del encabezado
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const address = XLSX.utils.encode_cell({ r: 0, c: C });
+          worksheet[address].s = headerStyle;
+        }
+        
+        // Crear y guardar el libro
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'PlantillaEncuesta');
+        
+        // Ajustar el ancho de las columnas automáticamente
+        const maxWidth = 50;
+        const wscols = header.map(() => ({ wch: maxWidth }));
+        worksheet['!cols'] = wscols;
+        
         XLSX.writeFile(workbook, 'Plantilla_Encuesta_Avanzada.xlsx');
         toast({
           title: 'Plantilla descargada',
