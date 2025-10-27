@@ -49,7 +49,7 @@ const ComparativeAnalysis = ({ company, activeRubro }) => {
       .maybeSingle();
 
     if (error) {
-      console.log(`No specific survey found for rubro ${activeRubro}, will not show detailed analysis.`);
+      
       setSurveyIdForActiveRubro(null);
     } else if (data) {
       setSurveyIdForActiveRubro(data.survey_id);
@@ -264,6 +264,17 @@ const ComparativeAnalysis = ({ company, activeRubro }) => {
             <motion.div variants={itemVariants} className="grid md:grid-cols-2 gap-8 mt-8">
               <PerformanceHighlightCard title="Mejor Evaluado" item={performanceSummary.best_performer} type="best" />
               <PerformanceHighlightCard title="Peor Evaluado" item={performanceSummary.worst_performer} type="worst" />
+            </motion.div>
+          )}
+
+          {!isTestMode && activeRubro && surveyIdForActiveRubro === null && (
+            <motion.div variants={itemVariants} className="mt-12">
+              <div className="p-6 rounded-lg border bg-muted/50 text-center">
+                <h3 className="text-lg font-semibold">Sin análisis detallado</h3>
+                <p className="text-muted-foreground mt-2">
+                  No hay encuesta específica para el rubro seleccionado. Agrega una encuesta para ver el análisis detallado.
+                </p>
+              </div>
             </motion.div>
           )}
 

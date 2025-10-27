@@ -7,7 +7,7 @@ import Step2_Rubros from '@/components/admin/surveys/Step2_Rubros';
 import Step3_Questions from '@/components/admin/surveys/Step3_Questions';
 import Step4_Review from '@/components/admin/surveys/Step4_Review';
 import { Download } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 
@@ -103,9 +103,44 @@ const SurveyEditor = ({ survey, rubrosList, onSave, onCancel }) => {
       return Object.values(row);
     });
 
+    // Crear la hoja de cálculo con estilos
     const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+    
+    // Aplicar estilos al encabezado
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4F46E5" } },
+      alignment: { horizontal: "center", vertical: "center" }
+    };
+    
+    // Aplicar estilos a las celdas del encabezado
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const address = XLSX.utils.encode_cell({ r: 0, c: C });
+      worksheet[address].s = headerStyle;
+    }
+
+    // Aplicar estilos a las celdas de datos
+    for (let R = 1; R <= range.e.r; ++R) {
+      for (let C = 0; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_cell({ r: R, c: C });
+        if (worksheet[address]) {
+          worksheet[address].s = {
+            alignment: { horizontal: "left", vertical: "center", wrapText: true }
+          };
+        }
+      }
+    }
+    
+    // Crear y guardar el libro
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'PlantillaEncuesta');
+    
+    // Ajustar el ancho de las columnas automáticamente
+    const maxWidth = 50;
+    const wscols = header.map(() => ({ wch: maxWidth }));
+    worksheet['!cols'] = wscols;
+    
     XLSX.writeFile(workbook, `${formData.title.replace(/ /g, '_')}_plantilla.xlsx`);
     toast({
       title: 'Plantilla descargada',

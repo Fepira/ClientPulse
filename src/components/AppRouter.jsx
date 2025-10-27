@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useUserRole } from '@/contexts/UserRoleContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import UpdatePasswordPage from '@/components/pages/UpdatePassword';
 
 const AuthPage = lazy(() => import('@/components/pages/AuthPage'));
 const RegisterPage = lazy(() => import('@/components/pages/RegisterPage'));
@@ -102,8 +103,7 @@ const AppRouter = () => {
           <Route path="/settings" element={<PrivateRoute><SettingsPage company={company} onCompanyUpdate={setCompany} /></PrivateRoute>} />
           
           <Route path="/admin/*" element={<PrivateRoute requiredRole="admin"><AdminDashboard /></PrivateRoute>} />
-
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} />} />
+          <Route path="/update-password" element={<UpdatePasswordPage />} />
         </Routes>
       </Suspense>
     </Router>

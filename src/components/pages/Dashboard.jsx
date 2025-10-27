@@ -163,7 +163,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
           )
           .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-              console.log(`Subscribed to realtime updates for company ${company.id}`);
+              
             }
             if (status === 'CHANNEL_ERROR') {
               console.error(`Realtime subscription error:`, err);

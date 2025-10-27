@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
     import { supabase } from '@/lib/customSupabaseClient';
     import { useToast } from '@/components/ui/use-toast';
+    import { sendPasswordRecoveryEmail } from '@/lib/email';
 
     const AuthContext = createContext(undefined);
 
@@ -128,26 +129,35 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
         return await apiWrapper(() => supabase.auth.signInWithPassword({ email, password }));
       }, [apiWrapper]);
 
+      useEffect(() => {
+        const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            window.location.hash = '/update-password';
+          }
+        });
+        return () => authListener?.subscription?.unsubscribe();
+      }, []);
       
       const sendPasswordResetEmail = useCallback(async (email) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/#/update-password`,
-        });
-        if (error) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: error.message,
-          });
-        } else {
-          toast({
-            title: "Correo enviado",
-            description: "Si existe una cuenta con ese email, recibirás un enlace para recuperar tu contraseña.",
-          });
-        }
-      }, [toast]);
-
-      const value = useMemo(() => ({
+         const { error } = await supabase.auth.resetPasswordForEmail(email, {
+           redirectTo: `${window.location.origin}#/update-password`,
+         });
+         if (error) {
+           toast({
+             variant: 'destructive',
+             title: 'Error',
+             description: error.message,
+           });
+         } else {
+           toast({
+             title: 'Correo enviado',
+             description: 'Si existe una cuenta con ese email, recibirás un enlace para recuperar tu contraseña.',
+           });
+           // Disparar correo adicional (opcional) mediante endpoint configurable
+           sendPasswordRecoveryEmail({ email });
+         }
+       }, [toast]);
+       const value = useMemo(() => ({
         user,
         session,
         loading,

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { MultiSelectCombobox } from '@/components/ui/combobox';
+import { sendWelcomeEmail } from '@/lib/email';
 
 const PasswordRequirement = ({ met, text }) => (
   <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-gray-500'}`}>
@@ -190,6 +191,8 @@ export default function RegisterPage({ selectedPlan, onCompanyCreated, onBack })
         description: "Tu cuenta ha sido creada. Ahora serás redirigido para completar el pago.",
       });
       handleSuccessfulSignUp(data.user, selectedPlan);
+      // Enviar correo de bienvenida de forma no bloqueante
+       sendWelcomeEmail({ email: formData.email, name: null, company: formData.companyName });
     }
   };
 
