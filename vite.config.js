@@ -1,11 +1,19 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
-import { createLogger, defineConfig } from 'vite';
+import { createLogger, defineConfig, loadEnv } from 'vite';
 import inlineEditPlugin from './plugins/visual-editor/vite-plugin-react-inline-editor.js';
 import editModeDevPlugin from './plugins/visual-editor/vite-plugin-edit-mode.js';
 import iframeRouteRestorationPlugin from './plugins/vite-plugin-iframe-route-restoration.js';
 
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Defaults for local dev; overridable via env loaded in defineConfig
+const DEFAULT_DEV_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost',
+  'http://127.0.0.1'
+];
 
 const configHorizonsViteErrorHandler = `
 const observer = new MutationObserver((mutations) => {
@@ -201,34 +209,63 @@ logger.error = (msg, options) => {
 	loggerError(msg, options);
 }
 
-export default defineConfig({
-	customLogger: logger,
-	plugins: [
-		...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin()] : []),
-		react(),
-		addTransformIndexHtml
-	],
-	server: {
-		cors: true,
-		headers: {
-			'Cross-Origin-Embedder-Policy': 'credentialless',
-		},
-		allowedHosts: true,
-	},
-	resolve: {
-		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-		},
-	},
-	build: {
-		rollupOptions: {
-			external: [
-				'@babel/parser',
-				'@babel/traverse',
-				'@babel/generator',
-				'@babel/types'
-			]
-		}
-	}
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const isDevMode = mode !== 'production';
+
+  // Allow configuring dev CORS/hosts via env (e.g., Horizons/Hostinger)
+  const DEV_ALLOWED_ORIGINS = (env.DEV_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const devCorsAllowedOrigins = DEV_ALLOWED_ORIGINS.length ? DEV_ALLOWED_ORIGINS : DEFAULT_DEV_ORIGINS;
+
+  const DEV_ALLOWED_HOSTS = (env.DEV_ALLOWED_HOSTS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const devAllowedHosts = DEV_ALLOWED_HOSTS.length ? DEV_ALLOWED_HOSTS : ['localhost', '127.0.0.1'];
+
+  return {
+    customLogger: logger,
+    plugins: [
+      ...(isDevMode ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin()] : []),
+      react(),
+      addTransformIndexHtml
+    ],
+    server: {
+      // Harden dev CORS: explicitly allow known local origins only
+      cors: isDevMode ? {
+        origin: (origin) => {
+          // If origin is undefined (same-origin requests), allow
+          if (!origin) return true;
+          return devCorsAllowedOrigins.includes(origin);
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+      } : false,
+      headers: {
+        'Cross-Origin-Embedder-Policy': 'credentialless',
+      },
+      // Restrict which Host headers are accepted in dev
+      allowedHosts: isDevMode ? devAllowedHosts : true,
+    },
+    resolve: {
+      extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        external: [
+          '@babel/parser',
+          '@babel/traverse',
+          '@babel/generator',
+          '@babel/types'
+        ]
+      }
+    }
+  };
 });
