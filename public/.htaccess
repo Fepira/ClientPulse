@@ -16,4 +16,9 @@
   <If "%{REQUEST_URI} =~ m#^/assets/.*$#">
     Header set Cache-Control "public, max-age=604800"
   </If>
+
+  # Anti-Clickjacking headers
+  # Prefer Content-Security-Policy (modern) and keep X-Frame-Options for legacy compatibility
+  Header always set Content-Security-Policy "frame-ancestors 'self'"
+  Header always set X-Frame-Options "SAMEORIGIN"
 </IfModule>
