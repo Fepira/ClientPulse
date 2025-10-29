@@ -21,4 +21,10 @@
   # Prefer Content-Security-Policy (modern) and keep X-Frame-Options for legacy compatibility
   Header always set Content-Security-Policy "frame-ancestors 'self'"
   Header always set X-Frame-Options "SAMEORIGIN"
+
+  # MIME sniffing protection
+  Header always set X-Content-Type-Options "nosniff"
+
+  # HSTS: force HTTPS for 1 year on all subdomains (only on HTTPS responses)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
 </IfModule>
