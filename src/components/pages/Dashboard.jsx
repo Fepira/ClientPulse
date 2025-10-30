@@ -91,7 +91,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
                 csat: data.csat || { current: 0, change: 0 },
                 nps: data.nps || { current: 0, change: 0, promotersPercent: 0, detractorsPercent: 0 },
                 totalResponses: data.totalResponses || { current: 0, change: 0 },
-                trends: data.trends || { csat: [], nps: [] },
+                trends: { csat: [], nps: [] },
                 demographics: data.demographics || { byGender: [], byAge: [], metricsByGender: [], metricsByAge: [] },
                 periodName: data.periodName || 'Mes Actual'
             };
@@ -163,7 +163,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
           )
           .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-              console.log(`Subscribed to realtime updates for company ${company.id}`);
+              
             }
             if (status === 'CHANNEL_ERROR') {
               console.error(`Realtime subscription error:`, err);

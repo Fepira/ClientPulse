@@ -49,7 +49,7 @@ const ComparativeAnalysis = ({ company, activeRubro }) => {
       .maybeSingle();
 
     if (error) {
-      console.log(`No specific survey found for rubro ${activeRubro}, will not show detailed analysis.`);
+      
       setSurveyIdForActiveRubro(null);
     } else if (data) {
       setSurveyIdForActiveRubro(data.survey_id);
