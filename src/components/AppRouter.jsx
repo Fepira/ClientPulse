@@ -95,7 +95,7 @@ const AppRouter = () => {
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthPage />} />
           <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterPage />} />
           <Route path="/plans" element={<PlansPage />} />
-          <Route path="/billing" element={<BillingPage />} />
+          <Route path="/billing" element={<BillingPage company={company} />} />
           <Route path="/survey/:locationId" element={<SurveyPage />} />
           
           <Route path="/dashboard/*" element={<PrivateRoute><Dashboard company={company} onCompanyUpdate={setCompany} /></PrivateRoute>} />
