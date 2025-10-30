@@ -1,9 +1,11 @@
 import path from 'node:path';
+import crypto from 'node:crypto';
 import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig, loadEnv } from 'vite';
 import inlineEditPlugin from './plugins/visual-editor/vite-plugin-react-inline-editor.js';
 import editModeDevPlugin from './plugins/visual-editor/vite-plugin-edit-mode.js';
 import iframeRouteRestorationPlugin from './plugins/vite-plugin-iframe-route-restoration.js';
+import cspNoncePlugin from './plugins/vite-plugin-csp-nonce.js';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -149,28 +151,43 @@ window.fetch = function(...args) {
 const addTransformIndexHtml = {
 	name: 'add-transform-index-html',
 	transformIndexHtml(html) {
+		// Generate nonces for CSP compliance
+		const generateNonce = () => crypto.randomBytes(16).toString('base64');
+		
 		const tags = [
 			{
 				tag: 'script',
-				attrs: { type: 'module' },
+				attrs: { 
+					type: 'module',
+					nonce: generateNonce()
+				},
 				children: configHorizonsRuntimeErrorHandler,
 				injectTo: 'head',
 			},
 			{
 				tag: 'script',
-				attrs: { type: 'module' },
+				attrs: { 
+					type: 'module',
+					nonce: generateNonce()
+				},
 				children: configHorizonsViteErrorHandler,
 				injectTo: 'head',
 			},
 			{
 				tag: 'script',
-				attrs: {type: 'module'},
+				attrs: {
+					type: 'module',
+					nonce: generateNonce()
+				},
 				children: configHorizonsConsoleErrroHandler,
 				injectTo: 'head',
 			},
 			{
 				tag: 'script',
-				attrs: { type: 'module' },
+				attrs: { 
+					type: 'module',
+					nonce: generateNonce()
+				},
 				children: configWindowFetchMonkeyPatch,
 				injectTo: 'head',
 			},
@@ -231,7 +248,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       ...(isDevMode ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin()] : []),
       react(),
-      addTransformIndexHtml
+      addTransformIndexHtml,
+      cspNoncePlugin()
     ],
     server: {
       // Harden dev CORS: explicitly allow known local origins only

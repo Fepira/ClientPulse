@@ -31,6 +31,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
+    "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.285.0",
@@ -44,6 +45,7 @@
     "recharts": "^2.12.7",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
