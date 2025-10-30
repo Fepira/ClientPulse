@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
     import { useTestMode } from '@/contexts/TestModeContext';
     import { useToast } from '@/components/ui/use-toast';
     import { supabase } from '@/lib/customSupabaseClient';
-    import { plansData } from '@/data/plans';
+    import { plansData } from '@/data/plans.js';
     import { mockMetrics } from '@/data/mock-data';
     import DashboardHeader from '@/components/dashboard/DashboardHeader';
     import TestModeHeader from '@/components/dashboard/TestModeHeader';
